@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rotisserie session view</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#C2410C}a:hover{color:#9A3412}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; background: #F5F6F7; color: #16181D; font-family: Inter, system-ui, sans-serif; font-size: 14px; line-height: 1.5">
+
+<!-- Sidebar -->
+<nav aria-label="Sessions" style="flex: 1 1 264px; max-width: 100%; box-sizing: border-box; padding: 20px 16px; background: #FFFFFF; border-right: 1px solid #E3E5E9; display: flex; flex-direction: column; gap: 24px">
+  <div style="display: flex; align-items: center; justify-content: space-between">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.5 0 4.95 1 6.75 2.75L21 8"/><path d="M21 3v5h-5"/><circle cx="12" cy="12" r="2.5" fill="#C2410C" stroke="none"/></svg>
+      <span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px; letter-spacing: -0.01em">Rotisserie</span>
+    </div>
+    <button aria-label="Switch to dark theme" style="width: 44px; height: 44px; border: 1px solid #E3E5E9; border-radius: 10px; background: #FFFFFF; color: #4B5160; display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <div style="font-size: 12px; font-weight: 600; color: #646B7A; letter-spacing: 0.04em; text-transform: uppercase; padding: 0 8px">rotisserie</div>
+    <a href="#session" style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 10px; background: #FFF1E8; color: #16181D; text-decoration: none">
+      <span style="display: flex; justify-content: space-between; gap: 8px"><span style="font-weight: 600">Plugin design</span><span style="font-size: 12px; color: #9A3412; font-weight: 600">7 open</span></span>
+      <span style="display: flex; gap: 2px; height: 4px"><span style="flex: 14; background: #C2410C; border-radius: 2px"></span><span style="flex: 7; background: #F3C9AE; border-radius: 2px"></span></span>
+    </a>
+    <a href="#session" style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 10px; color: #16181D; text-decoration: none">
+      <span style="display: flex; justify-content: space-between; gap: 8px"><span style="font-weight: 500">Storage format</span><span style="font-size: 12px; color: #646B7A">2 open</span></span>
+      <span style="display: flex; gap: 2px; height: 4px"><span style="flex: 9; background: #4B5160; border-radius: 2px"></span><span style="flex: 2; background: #E3E5E9; border-radius: 2px"></span></span>
+    </a>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <div style="font-size: 12px; font-weight: 600; color: #646B7A; letter-spacing: 0.04em; text-transform: uppercase; padding: 0 8px">billing-api</div>
+    <a href="#session" style="display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 10px; color: #16181D; text-decoration: none">
+      <span style="display: flex; justify-content: space-between; gap: 8px"><span style="font-weight: 500">Invoice retries</span><span style="font-size: 12px; color: #646B7A">12 open</span></span>
+      <span style="display: flex; gap: 2px; height: 4px"><span style="flex: 6; background: #4B5160; border-radius: 2px"></span><span style="flex: 12; background: #E3E5E9; border-radius: 2px"></span></span>
+    </a>
+  </div>
+
+  <button style="display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 8px; border: 0; background: none; color: #4B5160; font: inherit; cursor: pointer; text-align: left">
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+    Past sessions (9)
+  </button>
+</nav>
+
+<!-- Content -->
+<main id="session" style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+  <div style="box-sizing: border-box; width: 100%; max-width: 920px; margin: 0 auto; padding: 32px 32px 24px; display: flex; flex-direction: column; gap: 24px">
+
+    <!-- Header -->
+    <header style="display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 28px; line-height: 1.2; letter-spacing: -0.02em">Plugin design</h1>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: #646B7A; font-size: 13px">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 2px 6px; border: 1px solid #E3E5E9; border-radius: 6px; background: #FFFFFF">rt-7f3a</span>
+            <span>~/devel/ai/rotisserie</span>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: #FFFFFF; border: 1px solid #E3E5E9; font-size: 13px; color: #4B5160">
+          <span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #C2410C"></span>
+          Agent is waiting for you
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px; background: #FFFFFF; border: 1px solid #E3E5E9; border-radius: 12px">
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px">
+          <div><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 20px">14 of 21</span> <span style="color: #4B5160">answered</span></div>
+          <div style="color: #4B5160; font-size: 13px">7 to go, 3 of them new</div>
+        </div>
+        <div role="img" aria-label="11 sent, 3 done and not yet sent, 7 open" style="display: flex; gap: 2px; height: 8px">
+          <span style="flex: 11; background: #16181D; border-radius: 4px"></span>
+          <span style="flex: 3; background: #C2410C; border-radius: 4px"></span>
+          <span style="flex: 7; background: #E3E5E9; border-radius: 4px"></span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; color: #4B5160">
+          <span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 3px; background: #16181D"></span>Sent 11</span>
+          <span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 3px; background: #C2410C"></span>Done, not sent 3</span>
+          <span style="display: flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 10px; height: 10px; border-radius: 3px; background: #E3E5E9; border: 1px solid #C9CDD4; box-sizing: border-box"></span>Open 7</span>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div role="group" aria-label="Filter questions" style="display: flex; flex-wrap: wrap; gap: 8px">
+        <button aria-pressed="true" style="min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid #16181D; background: #16181D; color: #FFFFFF; font: inherit; font-weight: 500; cursor: pointer">All 21</button>
+        <button aria-pressed="false" style="min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid #E3E5E9; background: #FFFFFF; color: #16181D; font: inherit; font-weight: 500; cursor: pointer">Unanswered 7</button>
+        <button aria-pressed="false" style="min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid #E3E5E9; background: #FFFFFF; color: #16181D; font: inherit; font-weight: 500; cursor: pointer">New 3</button>
+        <button aria-pressed="false" style="min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid #E3E5E9; background: #FFFFFF; color: #16181D; font: inherit; font-weight: 500; cursor: pointer">Assumed by agent 1</button>
+      </div>
+    </header>
+
+    <!-- Questions -->
+    <div style="display: flex; flex-direction: column; gap: 8px">
+
+      <!-- Q1: sent, folded -->
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #FFFFFF; border: 1px solid #E3E5E9; border-radius: 12px">
+        <svg role="img" aria-label="Sent" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F7A4D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px">Q1</span>
+        <div style="flex: 1; min-width: 0"><div style="font-weight: 500; color: #4B5160">Relationship to grill-me</div><div style="color: #646B7A; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">List mattpocock-skills as a dependency, copy nothing in</div></div>
+        <span style="font-size: 12px; font-weight: 600; color: #1F7A4D">Sent</span>
+      </div>
+
+      <!-- Q1a: new follow-up, open, with options -->
+      <div style="margin-left: 28px; padding-left: 20px; border-left: 2px solid #E3E5E9">
+        <div style="display: flex; flex-direction: column; gap: 16px; padding: 20px; background: #FFFFFF; border: 1px solid #C2410C; border-radius: 12px; box-shadow: 0 1px 2px rgba(22,24,29,0.04), 0 8px 24px rgba(22,24,29,0.06)">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A">Q1a</span>
+            <span style="font-size: 12px; font-weight: 600; color: #9A3412; background: #FFF1E8; padding: 2px 8px; border-radius: 999px">New follow-up</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px; line-height: 1.3">What should happen when the dependency is missing?</h2>
+            <p style="margin: 0; color: #4B5160">The grill skill calls mattpocock-skills:grilling first. If that plugin is not installed, the call fails before any question is posted.</p>
+          </div>
+          <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px">
+            <legend style="padding: 0; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: #646B7A; letter-spacing: 0.04em; text-transform: uppercase">Pick one</legend>
+            <label style="display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 2px solid #C2410C; border-radius: 10px; background: #FFF8F3; cursor: pointer">
+              <input type="radio" name="q1a" checked style="margin: 3px 0 0; accent-color: #C2410C; width: 16px; height: 16px">
+              <span style="flex: 1"><span style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center"><span style="font-weight: 600">Stop and show the install command</span><span style="font-size: 11px; font-weight: 600; color: #4B5160; border: 1px solid #C9CDD4; padding: 1px 6px; border-radius: 6px">Recommended</span></span><span style="display: block; color: #4B5160; font-size: 13px">Nothing runs until the dependency is in place.</span></span>
+            </label>
+            <label style="display: flex; gap: 12px; align-items: flex-start; padding: 13px 15px; border: 1px solid #E3E5E9; border-radius: 10px; cursor: pointer">
+              <input type="radio" name="q1a" style="margin: 3px 0 0; accent-color: #C2410C; width: 16px; height: 16px">
+              <span style="flex: 1"><span style="font-weight: 600">Fall back to a built-in copy of the rules</span><span style="display: block; color: #4B5160; font-size: 13px">Works anywhere, but the copy can drift from upstream.</span></span>
+            </label>
+            <label style="display: flex; gap: 12px; align-items: flex-start; padding: 13px 15px; border: 1px solid #E3E5E9; border-radius: 10px; cursor: pointer">
+              <input type="radio" name="q1a" style="margin: 3px 0 0; accent-color: #C2410C; width: 16px; height: 16px">
+              <span style="flex: 1"><span style="font-weight: 600">Write my own answer</span></span>
+            </label>
+          </fieldset>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <label for="q1a-note" style="font-size: 13px; color: #4B5160">Add a note (optional)</label>
+            <input id="q1a-note" type="text" placeholder="For example: only for v1" style="box-sizing: border-box; width: 100%; height: 44px; padding: 0 12px; border: 1px solid #C9CDD4; border-radius: 10px; font: inherit; color: #16181D; background: #FFFFFF">
+          </div>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+            <div style="display: flex; flex-wrap: wrap; gap: 4px">
+              <button style="min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: #4B5160; font: inherit; cursor: pointer">Skip</button>
+              <button style="min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: #4B5160; font: inherit; cursor: pointer">Invalid question</button>
+              <button style="min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: #4B5160; font: inherit; cursor: pointer">Later</button>
+            </div>
+            <button style="min-height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: #16181D; color: #FFFFFF; font: inherit; font-weight: 600; cursor: pointer">Done <span style="margin-left: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; color: #C9CDD4; border: 1px solid #4B5160; border-radius: 5px; padding: 1px 5px">Ctrl+Enter</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2: sent -->
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #FFFFFF; border: 1px solid #E3E5E9; border-radius: 12px">
+        <svg role="img" aria-label="Sent" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F7A4D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px">Q2</span>
+        <div style="flex: 1; min-width: 0"><div style="font-weight: 500; color: #4B5160">Waiting for hours without burning tokens</div><div style="color: #646B7A; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Blocking background shell command</div></div>
+        <span style="font-size: 12px; font-weight: 600; color: #1F7A4D">Sent</span>
+      </div>
+
+      <!-- Q3: done, not sent -->
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #FFFFFF; border: 1px solid #E3E5E9; border-radius: 12px">
+        <svg role="img" aria-label="Done, not sent" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px">Q3</span>
+        <div style="flex: 1; min-width: 0"><div style="font-weight: 500">When the agent wakes</div><div style="color: #4B5160; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Done button per question, one global Respond for the batch</div></div>
+        <span style="font-size: 12px; font-weight: 600; color: #9A3412">Done, not sent</span>
+        <button style="min-height: 44px; padding: 0 12px; border: 1px solid #E3E5E9; border-radius: 10px; background: #FFFFFF; color: #16181D; font: inherit; cursor: pointer">Edit</button>
+      </div>
+
+      <!-- Q4: open, free text, focused -->
+      <div style="display: flex; flex-direction: column; gap: 16px; padding: 20px; background: #FFFFFF; border: 1px solid #E3E5E9; border-radius: 12px">
+        <div style="display: flex; align-items: center; gap: 10px">
+          <svg role="img" aria-label="Open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#646B7A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A">Q4</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px; line-height: 1.3">Where should sessions be stored?</h2>
+          <p style="margin: 0; color: #4B5160">Per project keeps decisions next to the code and lets you commit them. A global store allows search across projects but mixes unrelated work.</p>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; background: #F5F6F7; border-radius: 10px">
+          <div style="flex: 1 1 320px"><div style="font-size: 12px; font-weight: 600; color: #646B7A; letter-spacing: 0.04em; text-transform: uppercase">Agent recommends</div><div>Per project, in .rotisserie/sessions, with search scoped to the current project.</div></div>
+          <button style="min-height: 44px; padding: 0 14px; border: 1px solid #C9CDD4; border-radius: 10px; background: #FFFFFF; color: #16181D; font: inherit; font-weight: 500; cursor: pointer">Accept</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <label for="q4-answer" style="font-size: 13px; color: #4B5160">Your answer</label>
+          <textarea id="q4-answer" rows="3" style="box-sizing: border-box; width: 100%; padding: 12px; border: 2px solid #C2410C; border-radius: 10px; font: inherit; color: #16181D; background: #FFFFFF; resize: vertical; outline: 3px solid #FFE1CF">Per project by default, but let the agent search past sessions through MCP</textarea>
+          <div style="font-size: 12px; color: #646B7A">Draft saved</div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+          <div style="display: flex; flex-wrap: wrap; gap: 4px">
+            <button style="min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: #4B5160; font: inherit; cursor: pointer">Skip</button>
+            <button style="min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: #4B5160; font: inherit; cursor: pointer">Invalid question</button>
+            <button style="min-height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: #4B5160; font: inherit; cursor: pointer">Later</button>
+          </div>
+          <button style="min-height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: #16181D; color: #FFFFFF; font: inherit; font-weight: 600; cursor: pointer">Done <span style="margin-left: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; color: #C9CDD4; border: 1px solid #4B5160; border-radius: 5px; padding: 1px 5px">Ctrl+Enter</span></button>
+        </div>
+      </div>
+
+      <!-- Q5: skipped, assumed by agent -->
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #FFFFFF; border: 1px solid #E3E5E9; border-radius: 12px">
+        <svg role="img" aria-label="Assumed by agent" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6D3FC4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 5.6L20 9.3l-4.4 3.9L17 19l-5-3-5 3 1.4-5.8L4 9.3l5.8-.7z"/></svg>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px">Q5</span>
+        <div style="flex: 1; min-width: 0"><div style="font-weight: 500; color: #4B5160">Default port</div><div style="color: #646B7A; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">You skipped. Agent chose a fixed port with fallback to the next free one.</div></div>
+        <span style="font-size: 12px; font-weight: 600; color: #6D3FC4">Assumed by agent</span>
+        <button style="min-height: 44px; padding: 0 12px; border: 1px solid #E3E5E9; border-radius: 10px; background: #FFFFFF; color: #16181D; font: inherit; cursor: pointer">Review</button>
+      </div>
+
+      <!-- Q6: retracted -->
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #EDEEF0; border: 1px dashed #C9CDD4; border-radius: 12px">
+        <svg role="img" aria-label="Retracted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#646B7A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px">Q6</span>
+        <div style="flex: 1; min-width: 0"><div style="font-weight: 500; color: #5A6170; text-decoration: line-through">Should the daemon restart on crash?</div><div style="color: #5A6170; font-size: 13px">Retracted by agent: Q23 settled on no daemon.</div></div>
+        <span style="font-size: 12px; font-weight: 600; color: #5A6170">Retracted</span>
+      </div>
+
+      <!-- Q7: marked invalid, waiting for agent -->
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #FFFFFF; border: 1px solid #E3E5E9; border-radius: 12px">
+        <svg role="img" aria-label="Marked invalid" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B42318" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5v.1"/></svg>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px">Q7</span>
+        <div style="flex: 1; min-width: 0"><div style="font-weight: 500">Which cloud region hosts the server?</div><div style="color: #4B5160; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Your note: wrong premise, the server only runs on my machine.</div></div>
+        <span style="font-size: 12px; font-weight: 600; color: #B42318">Invalid, not sent</span>
+        <button style="min-height: 44px; padding: 0 12px; border: 1px solid #E3E5E9; border-radius: 10px; background: #FFFFFF; color: #16181D; font: inherit; cursor: pointer">Edit</button>
+      </div>
+
+      <!-- Q8, Q9: open, collapsed -->
+      <button style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 56px; background: #FFFFFF; border: 1px solid #E3E5E9; border-radius: 12px; font: inherit; color: #16181D; text-align: left; cursor: pointer">
+        <svg role="img" aria-label="Open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#646B7A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px">Q8</span>
+        <span style="flex: 1; font-weight: 600">How should a summary with HTML be rendered?</span>
+        <span style="font-size: 12px; color: #4B5160">3 options</span>
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#646B7A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <button style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 56px; background: #FFFFFF; border: 1px solid #E3E5E9; border-radius: 12px; font: inherit; color: #16181D; text-align: left; cursor: pointer">
+        <svg role="img" aria-label="Open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#646B7A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px">Q9</span>
+        <span style="flex: 1; font-weight: 600">What happens if two plugin versions run at once?</span>
+        <span style="font-size: 12px; color: #4B5160">Free text</span>
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#646B7A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Respond bar -->
+  <div style="position: sticky; bottom: 0; margin-top: auto; background: #FFFFFF; border-top: 1px solid #E3E5E9">
+    <div style="box-sizing: border-box; width: 100%; max-width: 920px; margin: 0 auto; padding: 12px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+      <div><span style="font-weight: 600">3 updates ready to send</span><span style="color: #4B5160"> · 2 answers, 1 marked invalid</span></div>
+      <button style="display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: {{accent}}; color: #FFFFFF; font: inherit; font-weight: 600; cursor: pointer">
+        Respond to agent
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#C2410C","options":["#C2410C","#B42318","#2456C7","#16181D"]},"$preview":{"width":1440,"height":1500}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#C2410C' };
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rotisserie summary and confirmation</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#C2410C}a:hover{color:#9A3412}
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; flex-direction: column; background: #F5F6F7; color: #16181D; font-family: Inter, system-ui, sans-serif; font-size: 14px; line-height: 1.5">
+
+  <div style="box-sizing: border-box; width: 100%; max-width: 920px; margin: 0 auto; padding: 32px 32px 24px; display: flex; flex-direction: column; gap: 24px">
+
+    <header style="display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px">
+        <div style="display: flex; flex-direction: column; gap: 4px">
+          <div style="font-size: 12px; font-weight: 600; color: #646B7A; letter-spacing: 0.04em; text-transform: uppercase">Plugin design · rt-7f3a</div>
+          <h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 28px; line-height: 1.2; letter-spacing: -0.02em">Do we have a shared understanding?</h1>
+        </div>
+        <button style="display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid #C9CDD4; border-radius: 10px; background: #FFFFFF; color: #16181D; font: inherit; font-weight: 500; cursor: pointer">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+          Export Markdown
+        </button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px; background: #FFFFFF; border: 1px solid #E3E5E9; border-radius: 12px">
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px">
+          <div><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 20px">23 of 23</span> <span style="color: #4B5160">settled</span></div>
+          <div style="color: #4B5160; font-size: 13px">19 answered by you · 2 assumed by agent · 2 retracted</div>
+        </div>
+        <div role="img" aria-label="19 answered by you, 2 assumed by agent, 2 retracted" style="display: flex; gap: 2px; height: 8px">
+          <span style="flex: 19; background: #16181D; border-radius: 4px"></span>
+          <span style="flex: 2; background: #6D3FC4; border-radius: 4px"></span>
+          <span style="flex: 2; background: #C9CDD4; border-radius: 4px"></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Agent-written summary -->
+    <section aria-label="Summary written by the agent" style="display: flex; flex-direction: column; gap: 20px; padding: 24px; background: #FFFFFF; border: 1px solid #E3E5E9; border-radius: 12px">
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #646B7A; letter-spacing: 0.04em; text-transform: uppercase">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 10h8M8 14h5"/></svg>
+        Summary from the agent
+      </div>
+      <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 20px; line-height: 1.3">Rotisserie: a browser front end for grilling sessions</h2>
+      <p style="margin: 0; color: #4B5160; max-width: 68ch">The agent posts questions through MCP and stops. You answer in the browser at your own pace, and pressing Respond wakes the agent with one batch. Sessions are files in the project, so they survive restarts and can be searched later.</p>
+
+      <!-- Diagram built from placed elements -->
+      <div role="img" aria-label="Agents write to session files, one shared server reads them and serves the browser, and Respond writes a signal file that wakes the waiting agent" style="display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; padding: 20px; background: #F5F6F7; border-radius: 10px">
+        <div style="flex: 1 1 150px; display: flex; flex-direction: column; gap: 4px; padding: 14px; background: #FFFFFF; border: 1px solid #C9CDD4; border-radius: 10px">
+          <div style="font-weight: 600">Agent + MCP</div>
+          <div style="font-size: 13px; color: #4B5160">Posts questions, then waits at zero cost</div>
+        </div>
+        <div aria-hidden="true" style="display: flex; align-items: center; color: #646B7A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M14 6l6 6-6 6"/></svg></div>
+        <div style="flex: 1 1 150px; display: flex; flex-direction: column; gap: 4px; padding: 14px; background: #FFFFFF; border: 1px solid #C9CDD4; border-radius: 10px">
+          <div style="font-weight: 600">Session files</div>
+          <div style="font-size: 13px; color: #4B5160">Append-only log in .rotisserie/</div>
+        </div>
+        <div aria-hidden="true" style="display: flex; align-items: center; color: #646B7A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M14 6l6 6-6 6"/></svg></div>
+        <div style="flex: 1 1 150px; display: flex; flex-direction: column; gap: 4px; padding: 14px; background: #FFFFFF; border: 1px solid #C9CDD4; border-radius: 10px">
+          <div style="font-weight: 600">Shared server</div>
+          <div style="font-size: 13px; color: #4B5160">One port for every project</div>
+        </div>
+        <div aria-hidden="true" style="display: flex; align-items: center; color: #646B7A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M14 6l6 6-6 6"/></svg></div>
+        <div style="flex: 1 1 150px; display: flex; flex-direction: column; gap: 4px; padding: 14px; background: #FFF1E8; border: 1px solid #C2410C; border-radius: 10px">
+          <div style="font-weight: 600">You, in the browser</div>
+          <div style="font-size: 13px; color: #4B5160">Respond writes the wake-up signal</div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <h3 style="margin: 0 0 4px; font-size: 14px; font-weight: 600">Decisions</h3>
+        <div style="display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid #E3E5E9"><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px; padding-top: 2px">Q1</span><span style="flex: 1">mattpocock-skills is a listed dependency; nothing is copied in.</span></div>
+        <div style="display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid #E3E5E9"><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px; padding-top: 2px">Q2</span><span style="flex: 1">The agent waits through a blocking background shell command.</span></div>
+        <div style="display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid #E3E5E9"><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px; padding-top: 2px">Q3</span><span style="flex: 1">Done per question; one Respond sends the batch.</span></div>
+        <div style="display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid #E3E5E9"><span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px; padding-top: 2px">Q4</span><span style="flex: 1">Sessions are stored per project and searchable through MCP.</span></div>
+        <button style="align-self: flex-start; min-height: 44px; padding: 0; border: 0; background: none; color: #C2410C; font: inherit; font-weight: 500; cursor: pointer">Show all 19 decisions</button>
+      </div>
+    </section>
+
+    <!-- Assumed by agent: review before confirming -->
+    <section aria-label="Decisions assumed by the agent" style="display: flex; flex-direction: column; gap: 12px; padding: 20px 24px; background: #FFFFFF; border: 1px solid #E3E5E9; border-radius: 12px">
+      <div style="display: flex; align-items: center; gap: 10px">
+        <svg role="img" aria-label="Assumed by agent" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6D3FC4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 5.6L20 9.3l-4.4 3.9L17 19l-5-3-5 3 1.4-5.8L4 9.3l5.8-.7z"/></svg>
+        <h3 style="margin: 0; font-size: 16px; font-weight: 600">Assumed by agent (2). Check these before you confirm.</h3>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid #E3E5E9">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px">Q5</span>
+        <div style="flex: 1 1 320px"><div style="font-weight: 500">Fixed default port, falling back to the next free one</div><div style="font-size: 13px; color: #4B5160">Why: a predictable port is what makes SSH forwarding a one-line command.</div></div>
+        <button style="min-height: 44px; padding: 0 14px; border: 1px solid #C9CDD4; border-radius: 10px; background: #FFFFFF; color: #16181D; font: inherit; font-weight: 500; cursor: pointer">Change</button>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid #E3E5E9">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #646B7A; width: 32px">Q17</span>
+        <div style="flex: 1 1 320px"><div style="font-weight: 500">Notes are append-only Markdown entries</div><div style="font-size: 13px; color: #4B5160">Why: other agents read them later, so history should never be rewritten.</div></div>
+        <button style="min-height: 44px; padding: 0 14px; border: 1px solid #C9CDD4; border-radius: 10px; background: #FFFFFF; color: #16181D; font: inherit; font-weight: 500; cursor: pointer">Change</button>
+      </div>
+    </section>
+
+    <!-- Not yet -->
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <label for="notyet" style="font-weight: 600">Not there yet? Tell the agent what is missing.</label>
+      <textarea id="notyet" rows="3" placeholder="For example: we never discussed what happens when the browser tab is closed" style="box-sizing: border-box; width: 100%; padding: 12px; border: 1px solid #C9CDD4; border-radius: 10px; font: inherit; color: #16181D; background: #FFFFFF; resize: vertical"></textarea>
+    </section>
+  </div>
+
+  <!-- Confirm bar -->
+  <div style="position: sticky; bottom: 0; margin-top: auto; background: #FFFFFF; border-top: 1px solid #E3E5E9">
+    <div style="box-sizing: border-box; width: 100%; max-width: 920px; margin: 0 auto; padding: 12px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+      <div style="color: #4B5160">Confirming closes the session and makes it read-only.</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <button style="min-height: 44px; padding: 0 16px; border: 1px solid #C9CDD4; border-radius: 10px; background: #FFFFFF; color: #16181D; font: inherit; font-weight: 600; cursor: pointer">Not yet, keep grilling</button>
+        <button style="display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: {{accent}}; color: #FFFFFF; font: inherit; font-weight: 600; cursor: pointer">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+          Confirm shared understanding
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#C2410C","options":["#C2410C","#B42318","#2456C7","#16181D"]},"$preview":{"width":1120,"height":1500}}'>
+class Component extends DCLogic {
+renderVals() {
+return { accent: this.props.accent ?? '#C2410C' };
+}
+}
+</script>
+</body>
+</html>

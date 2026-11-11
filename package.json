@@ -1,0 +1,37 @@
+{
+  "name": "rotisserie",
+  "version": "0.1.0",
+  "description": "Claude Code plugin: answer grill-me question rounds in a live browser page while the agent waits at zero token cost.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/space-grotesk": "^5.3.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "@testing-library/preact": "^3.2.6",
+    "@testing-library/user-event": "^14.6.9",
+    "@types/node": "^26.6.6",
+    "esbuild": "^0.28.2",
+    "jsdom": "^31.0.0",
+    "preact": "^11.2.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0",
+    "zod": "^4.6.7"
+  },
+  "author": "Dmitrii Lebed <lebed.dmitry@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dlebed/rotisserie.git"
+  },
+  "homepage": "https://github.com/dlebed/rotisserie#readme"
+}

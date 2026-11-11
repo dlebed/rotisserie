@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="#C2410C" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Rotisserie">
+  <path d="M41 24a17 17 0 1 1-17-17c4.7 0 9.3 1.9 12.7 5.2L41 16.5"/>
+  <path d="M41 6.5v10H31"/>
+  <circle cx="24" cy="24" r="6" fill="#C2410C" stroke="none"/>
+</svg>

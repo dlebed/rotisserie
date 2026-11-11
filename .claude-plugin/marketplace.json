@@ -1,0 +1,26 @@
+{
+  "name": "rotisserie-marketplace",
+  "owner": {
+    "name": "Dmitrii Lebed",
+    "email": "lebed.dmitry@gmail.com"
+  },
+  "metadata": {
+    "description": "Marketplace for the Rotisserie plugin: grill-me interviews in a live browser page."
+  },
+  "allowCrossMarketplaceDependenciesOn": [
+    "claude-plugins-official"
+  ],
+  "plugins": [
+    {
+      "name": "rotisserie",
+      "source": "./",
+      "description": "Move grill-me interview rounds into a live browser page while the agent waits at zero token cost.",
+      "dependencies": [
+        {
+          "name": "mattpocock-skills",
+          "marketplace": "claude-plugins-official"
+        }
+      ]
+    }
+  ]
+}

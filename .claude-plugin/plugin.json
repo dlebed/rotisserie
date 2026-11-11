@@ -1,0 +1,20 @@
+{
+  "name": "rotisserie",
+  "version": "0.1.0",
+  "description": "Move grill-me interview rounds into a live browser page while the agent waits at zero token cost.",
+  "author": {
+    "name": "Dmitrii Lebed",
+    "email": "lebed.dmitry@gmail.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "grill-me",
+    "interview",
+    "questions",
+    "planning",
+    "browser",
+    "mcp"
+  ],
+  "homepage": "https://github.com/dlebed/rotisserie",
+  "repository": "https://github.com/dlebed/rotisserie"
+}
