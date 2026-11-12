@@ -12,9 +12,11 @@ What you get:
 
 - A page that shows what is answered, open, new, sent, or assumed by the agent, with follow-ups nested under their parent.
 - Answers you can keep editing until you send them, and drafts that autosave.
+- Reopen any answered question just to look: "Close, no changes" (or Done with nothing edited) folds it back and tells the agent nothing. Only a real edit becomes a revision.
 - Skip (the agent investigates and decides, marked "assumed by agent" with its reason), Invalid (the agent must retract or re-ask, visibly), and Later.
 - Partial rounds: send 5 answers out of 10 and the other 5 stay yours. The agent cannot decide a question you have not answered; the server refuses it.
 - Sessions stored as files in your project, so they survive restarts and agents can search them later.
+- Closed sessions stay readable: "View questions and answers" on a confirmed session shows every question with your answer and the agent's decision, read-only.
 - A page that keeps working if the agent's session closes: actions queue in the browser and are sent when the agent is back.
 - Light and dark themes, and keyboard control of a whole session.
 
@@ -63,6 +65,7 @@ The agent starts a session, prints a link, and (unless disabled) opens it in you
 2. Press Done on a question to fold it. Nothing is sent yet.
 3. Press Respond to send what you have marked Done as one batch. You do not have to answer everything first: unanswered questions stay open and the agent waits for them. The agent wakes up, resolves what you answered, and posts follow-ups, which appear under their parent without moving anything you are looking at.
 4. When no questions remain, the agent posts a summary. "Confirm shared understanding" ends the session. "Not yet" needs a note and reopens it. The agent acts only after you confirm.
+5. A confirmed session is closed and read-only. Open it from Past sessions and press "View questions and answers" to read what was asked, what you answered and what the agent decided.
 
 How the waiting works: after posting, the agent starts `node dist/cli.js wait <id>` as a background shell task and ends its turn. The command checks the session file about once a second and exits when you send a batch, which wakes the agent. It reads files only. Nothing is polled by the model, so waiting costs no tokens. If you type in the terminal while it waits, the agent also fetches your updates.
 
@@ -83,7 +86,7 @@ Keys without Ctrl/Cmd or Alt are ignored while you are typing in a text field.
 | A | Accept the recommendation |
 | S, I, L | Skip, Invalid, Later |
 | E or Enter | Unfold the focused question |
-| Esc | Leave the text field, keep the question focused |
+| Esc | Leave the text field, keep the question focused. Pressed again on a reopened question with no edits: fold it back unchanged |
 | ? | Show the shortcut list |
 
 With no question focused, the keys act on the unfolded one.

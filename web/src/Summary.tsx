@@ -66,9 +66,11 @@ type Props = {
   /** Refused confirm/reopen actions, shown here because the Respond bar is not. */
   rejected: { action: { cid: string }; message: string }[];
   onChange: (qid: string) => void;
+  /** Show the question list: editable before confirmation, a read-only record after it. */
+  onViewList: () => void;
 };
 
-export function Summary({ state, outbox, offline, confirmPending, rejected, onChange }: Props) {
+export function Summary({ state, outbox, offline, confirmPending, rejected, onChange, onViewList }: Props) {
   const summary = state.summary;
   const themeVars = useThemeVars();
   const doc = useMemo(() => buildSummaryDoc(summary?.html ?? '', themeVars), [summary?.html, themeVars]);
@@ -100,6 +102,9 @@ export function Summary({ state, outbox, offline, confirmPending, rejected, onCh
     <section class="rt-summary" aria-label="Summary">
       <div class="rt-summary-head">
         <h2 class="rt-summary-title">{closed ? 'Shared understanding, confirmed' : 'Do we have a shared understanding?'}</h2>
+        <button type="button" class="rt-btn rt-view-list" onClick={onViewList}>
+          {closed ? 'View questions and answers' : 'Review questions and answers'}
+        </button>
         <button type="button" class="rt-btn rt-export" onClick={exportMd}>
           <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11" /><path d="M7 11l5 5 5-5" /><path d="M5 20h14" /></svg>

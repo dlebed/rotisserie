@@ -24,8 +24,10 @@ export type CardProps = {
   onSkip(qid: string): void;
   onInvalid(qid: string, reason: string): void;
   onLater(qid: string): void;
-  /** Unfold this card: Edit, Reopen, or a click on a folded open question. */
+  /** Unfold this card: Edit, Reopen, a click on a folded open question, or any row of a read-only session. */
   onEdit(qid: string): void;
+  /** Fold this card again and record nothing: the answer stays as it was. */
+  onClose?(qid: string): void;
   onDraft?(qid: string, draft: Draft): void;
   onDismiss?(cid: string): void;
 };
@@ -36,6 +38,14 @@ const EMPTY: Draft = { optionIds: [], text: '', note: '' };
 
 function fromResponse(r: UserResponse | undefined): Draft {
   return r?.kind === 'answer' ? { optionIds: [...r.optionIds], text: r.text ?? '', note: r.note ?? '' } : EMPTY;
+}
+
+const sameIds = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join('\n') === [...b].sort().join('\n');
+/** The form holds exactly what was already answered, so Done has nothing to record. */
+export function unchanged(q: Question, d: Draft): boolean {
+  const r = q.response;
+  if (q.status === 'open' || r?.kind !== 'answer') return false;
+  return sameIds(r.optionIds, d.optionIds) && (r.text ?? '').trim() === d.text.trim() && (r.note ?? '').trim() === d.note.trim();
 }
 
 function animates(): boolean {
@@ -75,7 +85,9 @@ export function QuestionCard(p: CardProps) {
   const info = stateInfo(q, p.later);
   const retracted = q.status === 'retracted';
   const open = p.expanded && !retracted && !p.readOnly;
-  const fold = useFold(open);
+  /** A closed session: the unfolded card is a record of the question, not a form. */
+  const record = p.expanded && !!p.readOnly;
+  const fold = useFold(open || record);
   const quiet = q.status === 'sent' || q.status === 'settled' || q.status === 'assumed';
   const root = useRef<HTMLDivElement>(null);
 
@@ -117,6 +129,10 @@ export function QuestionCard(p: CardProps) {
   };
 
   const finish = (act: () => void) => { cancelDraft(); setDirty(false); act(); };
+  const close = () => finish(() => p.onClose?.(q.id));
+  /** Looking at an answered question and folding it back is not a revision: nothing is recorded or sent. */
+  const done = (r: UserResponse) => (unchanged(q, draft) ? close() : finish(() => p.onDone(q.id, r)));
+  const skip = () => (q.status !== 'open' && q.response?.kind === 'skip' ? close() : finish(() => p.onSkip(q.id)));
   // A retraction must not make text the user typed disappear from view.
   const unsent = retracted && dirty && draft.text.trim() !== '' ? draft.text : '';
 
@@ -137,6 +153,7 @@ export function QuestionCard(p: CardProps) {
               <h2 class="rt-card-title">{q.title}</h2>
               {q.body && <p class="rt-card-body">{q.body}</p>}
             </div>
+            {p.readOnly && <Answered q={q} />}
             {q.decision && (
               <div class="rt-callout">
                 <div class="rt-eyebrow">{q.status === 'assumed' ? 'Agent assumed' : 'Agent decided'}</div>
@@ -144,11 +161,23 @@ export function QuestionCard(p: CardProps) {
                 {q.status === 'assumed' && q.reason && <div class="rt-pre rt-why"><span class="rt-eyebrow">Why</span> {q.reason}</div>}
               </div>
             )}
-            <AnswerForm q={q} draft={draft} saved={saved} onChange={change} />
-            {invalid
-              ? <InvalidPanel onCancel={() => { setInvalid(false); root.current?.focus(); }} onSubmit={(reason) => finish(() => p.onInvalid(q.id, reason))} />
-              : <Actions q={q} draft={draft} onSkip={() => finish(() => p.onSkip(q.id))} onInvalid={() => setInvalid(true)}
-                  onLater={() => finish(() => p.onLater(q.id))} onDone={(r) => finish(() => p.onDone(q.id, r))} />}
+            {p.readOnly && retracted && (
+              <div class="rt-callout">
+                <div class="rt-eyebrow">Retracted by agent</div>
+                <div class="rt-pre">{q.reason ?? ''}</div>
+              </div>
+            )}
+            {p.readOnly
+              ? <div class="rt-record-actions"><button type="button" class="rt-btn rt-btn-small" data-rt-action="close" onClick={close}>Close</button></div>
+              : (
+                <>
+                  <AnswerForm q={q} draft={draft} saved={saved} onChange={change} />
+                  {invalid
+                    ? <InvalidPanel onCancel={() => { setInvalid(false); root.current?.focus(); }} onSubmit={(reason) => finish(() => p.onInvalid(q.id, reason))} />
+                    : <Actions q={q} draft={draft} dirty={dirty} onSkip={skip} onInvalid={() => setInvalid(true)}
+                        onLater={() => finish(() => p.onLater(q.id))} onDone={done} onClose={close} />}
+                </>
+              )}
           </div>
         </div>
       )}
@@ -160,6 +189,50 @@ export function QuestionCard(p: CardProps) {
       )}
       {(p.rejected?.length ?? 0) > 0 && <Rejections q={q} rejected={p.rejected ?? []} onDismiss={p.onDismiss} />}
     </div>
+  );
+}
+
+/** Read-only record of what the user answered: the options offered with the chosen ones marked, the text and the note. */
+function Answered({ q }: { q: Question }) {
+  const r = q.response;
+  const options = q.options ?? [];
+  const rec = q.recommendation ?? '';
+  return (
+    <>
+      {rec && (
+        <div class="rt-callout">
+          <div class="rt-eyebrow">Agent recommended</div>
+          <div class="rt-pre">{rec}</div>
+        </div>
+      )}
+      <div class="rt-callout">
+        <div class="rt-eyebrow">Your answer</div>
+        {!r && <div class="rt-record-none">No answer was sent.</div>}
+        {r?.kind === 'skip' && <div>You skipped. The agent decided.</div>}
+        {r?.kind === 'invalid' && <div class="rt-pre">{`You marked the question invalid: ${r.reason}`}</div>}
+        {r?.kind === 'answer' && (
+          <>
+            {options.length > 0 && (
+              <ul class="rt-record-options">
+                {options.map((o) => {
+                  const chosen = r.optionIds.includes(o.id);
+                  return (
+                    <li key={o.id} class={`rt-record-option${chosen ? ' is-chosen' : ''}`}>
+                      <span class="rt-record-mark" aria-hidden="true">{chosen ? '✓' : '·'}</span>
+                      <span class="rt-record-label">{o.label}</span>
+                      {chosen && <span class="rt-tag">Chosen</span>}
+                      {o.recommended && <span class="rt-tag">Recommended</span>}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            {(r.text ?? '').trim() !== '' && <div class="rt-pre">{r.text}</div>}
+            {(r.note ?? '').trim() !== '' && <div class="rt-pre rt-why"><span class="rt-eyebrow">Note</span> {r.note}</div>}
+          </>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -181,16 +254,17 @@ function Row({ q, p }: { q: Question; p: CardProps }) {
       <StateLabel info={info} />
     </>
   );
-  if (q.status === 'open' && !p.readOnly) {
+  // In a closed session every row unfolds to its read-only record.
+  if (p.readOnly || q.status === 'open') {
     return (
-      <button type="button" class="rt-row rt-row-button" aria-expanded="false" onClick={() => p.onEdit(q.id)}>
+      <button type="button" class={`rt-row rt-row-button${p.readOnly ? ' is-record' : ''}`} aria-expanded="false" onClick={() => p.onEdit(q.id)}>
         {body}
         <svg class="rt-chevron" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
       </button>
     );
   }
-  const action = p.readOnly || q.status === 'retracted' ? null : q.status === 'done' ? 'Edit' : 'Reopen';
+  const action = q.status === 'retracted' ? null : q.status === 'done' ? 'Edit' : 'Reopen';
   return (
     <div class="rt-row">
       {body}
@@ -199,8 +273,9 @@ function Row({ q, p }: { q: Question; p: CardProps }) {
   );
 }
 
-function Actions({ q, draft, onSkip, onInvalid, onLater, onDone }: {
-  q: Question; draft: Draft; onSkip(): void; onInvalid(): void; onLater(): void; onDone(r: UserResponse): void;
+function Actions({ q, draft, dirty, onSkip, onInvalid, onLater, onDone, onClose }: {
+  q: Question; draft: Draft; dirty: boolean; onSkip(): void; onInvalid(): void; onLater(): void; onDone(r: UserResponse): void;
+  onClose(): void;
 }) {
   const [empty, setEmpty] = useState(false);
   useEffect(() => setEmpty(false), [draft]);
@@ -218,6 +293,12 @@ function Actions({ q, draft, onSkip, onInvalid, onLater, onDone }: {
           <button type="button" class="rt-btn-ghost" data-rt-action="skip" aria-keyshortcuts={keyShortcuts('skip')} onClick={onSkip}>Skip<KeyHint k="skip" /></button>
           <button type="button" class="rt-btn-ghost" data-rt-action="invalid" aria-keyshortcuts={keyShortcuts('invalid')} onClick={onInvalid}>Invalid question<KeyHint k="invalid" /></button>
           {q.status === 'open' && <button type="button" class="rt-btn-ghost" data-rt-action="later" aria-keyshortcuts={keyShortcuts('later')} onClick={onLater}>Later<KeyHint k="later" /></button>}
+          {/* An answered question can be looked at and folded back: nothing is recorded or sent. */}
+          {q.status !== 'open' && (
+            <button type="button" class="rt-btn-ghost" data-rt-action="close" data-rt-dirty={dirty ? '' : undefined} onClick={onClose}>
+              {dirty ? 'Discard changes' : 'Close, no changes'}
+            </button>
+          )}
         </div>
         <button type="button" class="rt-btn-primary" data-rt-action="done" aria-keyshortcuts={keyShortcuts('done')} onClick={done}>Done<KeyHint k="done" /></button>
       </div>

@@ -1,6 +1,6 @@
 {
   "name": "rotisserie",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Claude Code plugin: answer grill-me question rounds in a live browser page while the agent waits at zero token cost.",
   "type": "module",
   "private": true,

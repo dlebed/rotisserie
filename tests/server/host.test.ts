@@ -4,7 +4,7 @@ import net from 'node:net';
 import { promises as fs } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { startHostLoop } from '../../src/server/host';
+import { probeHealth, startHostLoop } from '../../src/server/host';
 import type { HostSeams } from '../../src/server/host';
 import { readServerInfo } from '../../src/core/registry';
 
@@ -70,10 +70,16 @@ test('a foreign server on the port makes the loop bind the next port', async () 
   const foreign = http.createServer((_q, r) => { r.end('hello'); });
   await new Promise<void>((r) => foreign.listen(port, '127.0.0.1', r));
   try {
-    const a = loop(); await a.ready();
+    // Test files run in parallel and the OS can hand out neighbouring ports, so port + 1 may hold another
+    // file's Rotisserie server. Only the base port is probed for real; any other busy port counts as foreign,
+    // so the loop walks on instead of standing by behind a server this test does not own.
+    const a = loop(50, { probe: (h, p) => (p === port ? probeHealth(h, p) : Promise.resolve('other')) });
+    await a.ready();
     expect(a.isHost()).toBe(true);
-    expect((await readServerInfo())?.port).toBe(port + 1);
-    expect((await health(port + 1)).app).toBe('rotisserie');
+    const bound = (await readServerInfo())?.port ?? 0;
+    expect(bound).toBeGreaterThan(port);
+    expect(bound).toBeLessThanOrEqual(port + 20);
+    expect((await health(bound)).app).toBe('rotisserie');
   } finally {
     foreign.closeAllConnections();
     await new Promise<void>((r) => foreign.close(() => r()));

@@ -585,7 +585,7 @@ function shortcutList() {
     { keys: "a", does: "Accept the recommendation" },
     { keys: "s / i / l", does: "Skip, Invalid, Later" },
     { keys: "e or Enter", does: "Unfold the focused question" },
-    { keys: "Esc", does: "Leave the text field, keep the card focused" },
+    { keys: "Esc", does: "Leave the text field; again to fold an answered question unchanged" },
     { keys: "?", does: "Show or hide this list" }
   ];
 }
@@ -900,6 +900,12 @@ var EMPTY = { optionIds: [], text: "", note: "" };
 function fromResponse(r3) {
   return r3?.kind === "answer" ? { optionIds: [...r3.optionIds], text: r3.text ?? "", note: r3.note ?? "" } : EMPTY;
 }
+var sameIds = (a4, b2) => a4.length === b2.length && [...a4].sort().join("\n") === [...b2].sort().join("\n");
+function unchanged(q2, d3) {
+  const r3 = q2.response;
+  if (q2.status === "open" || r3?.kind !== "answer") return false;
+  return sameIds(r3.optionIds, d3.optionIds) && (r3.text ?? "").trim() === d3.text.trim() && (r3.note ?? "").trim() === d3.note.trim();
+}
 function animates() {
   try {
     return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -941,7 +947,8 @@ function QuestionCard(p3) {
   const info = stateInfo(q2, p3.later);
   const retracted = q2.status === "retracted";
   const open = p3.expanded && !retracted && !p3.readOnly;
-  const fold = useFold(open);
+  const record = p3.expanded && !!p3.readOnly;
+  const fold = useFold(open || record);
   const quiet = q2.status === "sent" || q2.status === "settled" || q2.status === "assumed";
   const root2 = T2(null);
   const [draft, setDraft] = d2(() => q2.status === "open" ? p3.draft ?? EMPTY : fromResponse(q2.response));
@@ -986,6 +993,9 @@ function QuestionCard(p3) {
     setDirty(false);
     act();
   };
+  const close = () => finish(() => p3.onClose?.(q2.id));
+  const done = (r3) => unchanged(q2, draft) ? close() : finish(() => p3.onDone(q2.id, r3));
+  const skip = () => q2.status !== "open" && q2.response?.kind === "skip" ? close() : finish(() => p3.onSkip(q2.id));
   const unsent = retracted && dirty && draft.text.trim() !== "" ? draft.text : "";
   return /* @__PURE__ */ a3(
     "div",
@@ -1008,6 +1018,7 @@ function QuestionCard(p3) {
             /* @__PURE__ */ a3("h2", { class: "rt-card-title", children: q2.title }),
             q2.body && /* @__PURE__ */ a3("p", { class: "rt-card-body", children: q2.body })
           ] }),
+          p3.readOnly && /* @__PURE__ */ a3(Answered, { q: q2 }),
           q2.decision && /* @__PURE__ */ a3("div", { class: "rt-callout", children: [
             /* @__PURE__ */ a3("div", { class: "rt-eyebrow", children: q2.status === "assumed" ? "Agent assumed" : "Agent decided" }),
             /* @__PURE__ */ a3("div", { class: "rt-pre", children: q2.decision }),
@@ -1017,21 +1028,29 @@ function QuestionCard(p3) {
               q2.reason
             ] })
           ] }),
-          /* @__PURE__ */ a3(AnswerForm, { q: q2, draft, saved, onChange: change }),
-          invalid ? /* @__PURE__ */ a3(InvalidPanel, { onCancel: () => {
-            setInvalid(false);
-            root2.current?.focus();
-          }, onSubmit: (reason) => finish(() => p3.onInvalid(q2.id, reason)) }) : /* @__PURE__ */ a3(
-            Actions,
-            {
-              q: q2,
-              draft,
-              onSkip: () => finish(() => p3.onSkip(q2.id)),
-              onInvalid: () => setInvalid(true),
-              onLater: () => finish(() => p3.onLater(q2.id)),
-              onDone: (r3) => finish(() => p3.onDone(q2.id, r3))
-            }
-          )
+          p3.readOnly && retracted && /* @__PURE__ */ a3("div", { class: "rt-callout", children: [
+            /* @__PURE__ */ a3("div", { class: "rt-eyebrow", children: "Retracted by agent" }),
+            /* @__PURE__ */ a3("div", { class: "rt-pre", children: q2.reason ?? "" })
+          ] }),
+          p3.readOnly ? /* @__PURE__ */ a3("div", { class: "rt-record-actions", children: /* @__PURE__ */ a3("button", { type: "button", class: "rt-btn rt-btn-small", "data-rt-action": "close", onClick: close, children: "Close" }) }) : /* @__PURE__ */ a3($, { children: [
+            /* @__PURE__ */ a3(AnswerForm, { q: q2, draft, saved, onChange: change }),
+            invalid ? /* @__PURE__ */ a3(InvalidPanel, { onCancel: () => {
+              setInvalid(false);
+              root2.current?.focus();
+            }, onSubmit: (reason) => finish(() => p3.onInvalid(q2.id, reason)) }) : /* @__PURE__ */ a3(
+              Actions,
+              {
+                q: q2,
+                draft,
+                dirty,
+                onSkip: skip,
+                onInvalid: () => setInvalid(true),
+                onLater: () => finish(() => p3.onLater(q2.id)),
+                onDone: done,
+                onClose: close
+              }
+            )
+          ] })
         ] }) }),
         unsent && /* @__PURE__ */ a3("div", { class: "rt-unsent", children: [
           /* @__PURE__ */ a3("span", { class: "rt-eyebrow", children: "Your unsent text:" }),
@@ -1041,6 +1060,40 @@ function QuestionCard(p3) {
       ]
     }
   );
+}
+function Answered({ q: q2 }) {
+  const r3 = q2.response;
+  const options = q2.options ?? [];
+  const rec = q2.recommendation ?? "";
+  return /* @__PURE__ */ a3($, { children: [
+    rec && /* @__PURE__ */ a3("div", { class: "rt-callout", children: [
+      /* @__PURE__ */ a3("div", { class: "rt-eyebrow", children: "Agent recommended" }),
+      /* @__PURE__ */ a3("div", { class: "rt-pre", children: rec })
+    ] }),
+    /* @__PURE__ */ a3("div", { class: "rt-callout", children: [
+      /* @__PURE__ */ a3("div", { class: "rt-eyebrow", children: "Your answer" }),
+      !r3 && /* @__PURE__ */ a3("div", { class: "rt-record-none", children: "No answer was sent." }),
+      r3?.kind === "skip" && /* @__PURE__ */ a3("div", { children: "You skipped. The agent decided." }),
+      r3?.kind === "invalid" && /* @__PURE__ */ a3("div", { class: "rt-pre", children: `You marked the question invalid: ${r3.reason}` }),
+      r3?.kind === "answer" && /* @__PURE__ */ a3($, { children: [
+        options.length > 0 && /* @__PURE__ */ a3("ul", { class: "rt-record-options", children: options.map((o4) => {
+          const chosen = r3.optionIds.includes(o4.id);
+          return /* @__PURE__ */ a3("li", { class: `rt-record-option${chosen ? " is-chosen" : ""}`, children: [
+            /* @__PURE__ */ a3("span", { class: "rt-record-mark", "aria-hidden": "true", children: chosen ? "\u2713" : "\xB7" }),
+            /* @__PURE__ */ a3("span", { class: "rt-record-label", children: o4.label }),
+            chosen && /* @__PURE__ */ a3("span", { class: "rt-tag", children: "Chosen" }),
+            o4.recommended && /* @__PURE__ */ a3("span", { class: "rt-tag", children: "Recommended" })
+          ] }, o4.id);
+        }) }),
+        (r3.text ?? "").trim() !== "" && /* @__PURE__ */ a3("div", { class: "rt-pre", children: r3.text }),
+        (r3.note ?? "").trim() !== "" && /* @__PURE__ */ a3("div", { class: "rt-pre rt-why", children: [
+          /* @__PURE__ */ a3("span", { class: "rt-eyebrow", children: "Note" }),
+          " ",
+          r3.note
+        ] })
+      ] })
+    ] })
+  ] });
 }
 function Row({ q: q2, p: p3 }) {
   const info = stateInfo(q2, p3.later);
@@ -1062,8 +1115,8 @@ function Row({ q: q2, p: p3 }) {
     hint && /* @__PURE__ */ a3("span", { class: "rt-row-hint", children: hint }),
     /* @__PURE__ */ a3(StateLabel, { info })
   ] });
-  if (q2.status === "open" && !p3.readOnly) {
-    return /* @__PURE__ */ a3("button", { type: "button", class: "rt-row rt-row-button", "aria-expanded": "false", onClick: () => p3.onEdit(q2.id), children: [
+  if (p3.readOnly || q2.status === "open") {
+    return /* @__PURE__ */ a3("button", { type: "button", class: `rt-row rt-row-button${p3.readOnly ? " is-record" : ""}`, "aria-expanded": "false", onClick: () => p3.onEdit(q2.id), children: [
       body,
       /* @__PURE__ */ a3(
         "svg",
@@ -1083,13 +1136,13 @@ function Row({ q: q2, p: p3 }) {
       )
     ] });
   }
-  const action = p3.readOnly || q2.status === "retracted" ? null : q2.status === "done" ? "Edit" : "Reopen";
+  const action = q2.status === "retracted" ? null : q2.status === "done" ? "Edit" : "Reopen";
   return /* @__PURE__ */ a3("div", { class: "rt-row", children: [
     body,
     action && /* @__PURE__ */ a3("button", { type: "button", class: "rt-btn rt-btn-small", onClick: () => p3.onEdit(q2.id), children: action })
   ] });
 }
-function Actions({ q: q2, draft, onSkip, onInvalid, onLater, onDone }) {
+function Actions({ q: q2, draft, dirty, onSkip, onInvalid, onLater, onDone, onClose }) {
   const [empty, setEmpty] = d2(false);
   A2(() => setEmpty(false), [draft]);
   const done = () => {
@@ -1119,7 +1172,8 @@ function Actions({ q: q2, draft, onSkip, onInvalid, onLater, onDone }) {
         q2.status === "open" && /* @__PURE__ */ a3("button", { type: "button", class: "rt-btn-ghost", "data-rt-action": "later", "aria-keyshortcuts": keyShortcuts("later"), onClick: onLater, children: [
           "Later",
           /* @__PURE__ */ a3(KeyHint, { k: "later" })
-        ] })
+        ] }),
+        q2.status !== "open" && /* @__PURE__ */ a3("button", { type: "button", class: "rt-btn-ghost", "data-rt-action": "close", "data-rt-dirty": dirty ? "" : void 0, onClick: onClose, children: dirty ? "Discard changes" : "Close, no changes" })
       ] }),
       /* @__PURE__ */ a3("button", { type: "button", class: "rt-btn-primary", "data-rt-action": "done", "aria-keyshortcuts": keyShortcuts("done"), onClick: done, children: [
         "Done",
@@ -1229,7 +1283,7 @@ function useThemeVars() {
   }, []);
   return vars;
 }
-function Summary({ state, outbox, offline, confirmPending, rejected, onChange }) {
+function Summary({ state, outbox, offline, confirmPending, rejected, onChange, onViewList }) {
   const summary = state.summary;
   const themeVars = useThemeVars();
   const doc = w2(() => buildSummaryDoc(summary?.html ?? "", themeVars), [summary?.html, themeVars]);
@@ -1264,6 +1318,7 @@ function Summary({ state, outbox, offline, confirmPending, rejected, onChange })
   return /* @__PURE__ */ a3("section", { class: "rt-summary", "aria-label": "Summary", children: [
     /* @__PURE__ */ a3("div", { class: "rt-summary-head", children: [
       /* @__PURE__ */ a3("h2", { class: "rt-summary-title", children: closed ? "Shared understanding, confirmed" : "Do we have a shared understanding?" }),
+      /* @__PURE__ */ a3("button", { type: "button", class: "rt-btn rt-view-list", onClick: onViewList, children: closed ? "View questions and answers" : "Review questions and answers" }),
       /* @__PURE__ */ a3("button", { type: "button", class: "rt-btn rt-export", onClick: exportMd, children: [
         /* @__PURE__ */ a3(
           "svg",
@@ -1851,6 +1906,7 @@ function SessionView({ pk, id, dir, api: api2 = api, storage: storageProp, send,
   const [filter, setFilter] = d2("all");
   const [expanded, setExpanded] = d2(void 0);
   const [listFromSummary, setListFromSummary] = d2(false);
+  const [records, setRecords] = d2([]);
   const phase = data.state?.phase;
   A2(() => {
     if (phase === "active" && listFromSummary) setListFromSummary(false);
@@ -1870,6 +1926,11 @@ function SessionView({ pk, id, dir, api: api2 = api, storage: storageProp, send,
     const target = focusAfter.current;
     if (target === null) return;
     const root2 = (qid) => cardEl(listRef.current, qid);
+    if (target.card) {
+      focusAfter.current = null;
+      root2(target.from)?.focus();
+      return;
+    }
     if (target.next !== null && !root2(target.next)?.classList.contains("is-expanded") && target.waits++ < 2) return;
     focusAfter.current = null;
     if (target.next !== null) {
@@ -1926,8 +1987,18 @@ function SessionView({ pk, id, dir, api: api2 = api, storage: storageProp, send,
     // Edit and Reopen remove the button that was clicked, so move focus into the unfolded card; otherwise
     // focus falls to the page and the card's shortcuts stop working.
     onEdit: (qid) => {
+      if (readOnly) {
+        setRecords((r3) => r3.includes(qid) ? r3 : [...r3, qid]);
+        focusAfter.current = { next: null, from: qid, waits: 0, card: true };
+        return;
+      }
       setExpanded(qid);
       focusAfter.current = { next: qid, from: qid, waits: 0 };
+    },
+    onClose: (qid) => {
+      if (readOnly) setRecords((r3) => r3.filter((x2) => x2 !== qid));
+      else setExpanded(null);
+      focusAfter.current = { next: null, from: qid, waits: 0, card: true };
     },
     onDraft: (qid, draft) => outbox.enqueue({ kind: "draft", qid, draft }),
     onDismiss: (cid) => outbox.dismissRejected(cid)
@@ -1962,7 +2033,7 @@ function SessionView({ pk, id, dir, api: api2 = api, storage: storageProp, send,
         cardEl(listRef.current, cur2)?.focus();
         return true;
       }
-      return false;
+      return cur2 !== null && press(cur2, '[data-rt-action="close"]:not([data-rt-dirty])');
     }
     if (a4.kind === "respond") {
       const btn = respondRef.current;
@@ -1993,7 +2064,12 @@ function SessionView({ pk, id, dir, api: api2 = api, storage: storageProp, send,
         return true;
       }
       case "unfold": {
-        if (readOnly || state.questions[cur]?.status === "retracted") return false;
+        if (readOnly) {
+          if (records.includes(cur)) handlers.onClose(cur);
+          else handlers.onEdit(cur);
+          return true;
+        }
+        if (state.questions[cur]?.status === "retracted") return false;
         if (shownExpanded === cur) {
           const card = cardEl(listRef.current, cur);
           (card?.querySelector("input, textarea") ?? card)?.focus();
@@ -2014,7 +2090,7 @@ function SessionView({ pk, id, dir, api: api2 = api, storage: storageProp, send,
         {
           question: q2,
           draft: asDraft(drafts[qid]),
-          expanded: shownExpanded === qid,
+          expanded: readOnly ? records.includes(qid) : shownExpanded === qid,
           later: isLater(qid),
           readOnly,
           hidden: !visible(q2),
@@ -2089,6 +2165,7 @@ function SessionView({ pk, id, dir, api: api2 = api, storage: storageProp, send,
           offline,
           confirmPending: outbox.pending().some((a4) => a4.kind === "confirm"),
           rejected: rejected.filter((r3) => r3.action.kind === "confirm" || r3.action.kind === "reopen"),
+          onViewList: () => setListFromSummary(true),
           onChange: (qid) => {
             setListFromSummary(true);
             setExpanded(qid);
@@ -2096,7 +2173,19 @@ function SessionView({ pk, id, dir, api: api2 = api, storage: storageProp, send,
           }
         }
       ),
-      listFromSummary && /* @__PURE__ */ a3("button", { type: "button", class: "rt-btn rt-btn-small rt-back-summary", onClick: () => setListFromSummary(false), children: "Back to summary" }),
+      listFromSummary && /* @__PURE__ */ a3("div", { class: "rt-list-bar", children: [
+        /* @__PURE__ */ a3("button", { type: "button", class: "rt-btn rt-btn-small rt-back-summary", onClick: () => setListFromSummary(false), children: "Back to summary" }),
+        readOnly && /* @__PURE__ */ a3(
+          "button",
+          {
+            type: "button",
+            class: "rt-btn rt-btn-small",
+            onClick: () => setRecords(records.length > 0 ? [] : state.order.filter((x2) => state.questions[x2])),
+            children: records.length > 0 ? "Collapse all" : "Expand all"
+          }
+        ),
+        readOnly && /* @__PURE__ */ a3("span", { class: "rt-list-note", children: "This session is closed. Questions and answers are read-only." })
+      ] }),
       /* @__PURE__ */ a3(
         "div",
         {

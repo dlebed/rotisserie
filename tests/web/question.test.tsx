@@ -239,9 +239,71 @@ describe('QuestionCard', () => {
     expect(within(root).queryByText('Your unsent text:')).toBeNull();
   });
 
-  it('read-only cards have no controls', () => {
-    const { root } = card(question({ status: 'sent', response: { kind: 'skip' } }), { readOnly: true });
-    expect(within(root).queryAllByRole('button')).toHaveLength(0);
+  it('a read-only card unfolds to a record of the answer with no way to change it', async () => {
+    const q = question({ status: 'settled', options, recommendation: 'Stop and show it', decision: 'Stop with the install command',
+      response: { kind: 'answer', optionIds: ['b'], text: 'but log it', note: 'v1 only' } });
+    let c = card(q, { readOnly: true });
+    const buttons = within(c.root).getAllByRole('button');
+    expect(buttons).toHaveLength(1);                                  // the row itself; no Reopen
+    await userEvent.click(buttons[0]!);
+    expect(c.onEdit).toHaveBeenCalledWith('Q1');
+    c.unmount();
+    const onClose = vi.fn();
+    c = card(q, { readOnly: true, expanded: true, onClose });
+    expect(within(c.root).getByText('Your answer')).toBeTruthy();
+    const chosen = within(c.root).getByText('Fall back to a built-in copy').closest('li') as HTMLElement;
+    expect(within(chosen).getByText('Chosen')).toBeTruthy();
+    expect(within(c.root).getAllByText('Chosen')).toHaveLength(1);
+    expect(within(c.root).getByText('but log it')).toBeTruthy();
+    expect(within(c.root).getByText(/v1 only/)).toBeTruthy();
+    expect(within(c.root).getByText('Stop with the install command')).toBeTruthy();
+    expect(within(c.root).queryByRole('textbox')).toBeNull();
+    expect(within(c.root).queryByRole('radio')).toBeNull();
+    expect(within(c.root).getAllByRole('button').map((b) => b.textContent)).toEqual(['Close']);
+    await userEvent.click(within(c.root).getByRole('button', { name: 'Close' }));
+    expect(onClose).toHaveBeenCalledWith('Q1');
+    c.unmount();
+    c = card(question({ status: 'assumed', response: { kind: 'skip' }, decision: 'Port 4783', reason: 'Free' }), { readOnly: true, expanded: true });
+    expect(within(c.root).getByText('You skipped. The agent decided.')).toBeTruthy();
+    c.unmount();
+    c = card(question({ status: 'retracted', reason: 'No longer needed' }), { readOnly: true, expanded: true });
+    expect(within(c.root).getByText('No answer was sent.')).toBeTruthy();
+    expect(within(c.root).getByText('No longer needed')).toBeTruthy();
+  });
+
+  it('a reopened answer folds back unchanged: Close and an unedited Done record nothing', async () => {
+    const response = { kind: 'answer' as const, optionIds: ['a'], text: 'and log it' };
+    for (const status of ['done', 'sent', 'settled'] as const) {
+      const onClose = vi.fn();
+      const c = card(question({ status, options, response }), { expanded: true, onClose });
+      await userEvent.click(within(c.root).getByRole('button', { name: 'Close, no changes' }));
+      await userEvent.click(within(c.root).getByRole('button', { name: /^Done/ }));
+      expect(onClose).toHaveBeenCalledTimes(2);
+      expect(c.onDone).not.toHaveBeenCalled();
+      c.unmount();
+    }
+    expect(card(question(), { expanded: true }).queryByRole('button', { name: /Close/ })).toBeNull();   // an open question has nothing to keep
+  });
+
+  it('an edited reopened answer is a revision on Done, and Discard changes drops the edit', async () => {
+    const response = { kind: 'answer' as const, optionIds: [], text: 'Per project' };
+    const onClose = vi.fn();
+    const c = card(question({ status: 'settled', response, decision: 'Per project' }), { expanded: true, onClose });
+    await userEvent.type(within(c.root).getByRole('textbox', { name: 'Your answer' }), ' only');
+    await userEvent.click(within(c.root).getByRole('button', { name: 'Discard changes' }));
+    expect(onClose).toHaveBeenCalledWith('Q1');
+    expect(c.onDone).not.toHaveBeenCalled();
+    await userEvent.type(within(c.root).getByRole('textbox', { name: 'Your answer' }), '!');
+    await userEvent.click(within(c.root).getByRole('button', { name: /^Done/ }));
+    expect(c.onDone).toHaveBeenCalledWith('Q1', expect.objectContaining({ kind: 'answer' }));
+  });
+
+  it('Skip on a question the agent already decided after a skip records nothing', async () => {
+    const onClose = vi.fn();
+    const c = card(question({ status: 'assumed', response: { kind: 'skip' }, decision: 'Port 4783' }), { expanded: true, onClose });
+    await userEvent.click(within(c.root).getByRole('button', { name: /^Skip/ }));
+    expect(onClose).toHaveBeenCalledWith('Q1');
+    expect(c.onSkip).not.toHaveBeenCalled();
   });
 
   it('a rejected action shows its message, the text it carried and a Dismiss button', async () => {

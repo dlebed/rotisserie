@@ -323,6 +323,58 @@ describe('SessionView', () => {
     expect(within(cardOf('Q2')).queryByRole('textbox')).toBeNull();
   });
 
+  it('Reopen then Close leaves a settled question settled and sends nothing', async () => {
+    const s = fakeServer([created(), posted(qi('Q1', 'One'), qi('Q2', 'Two')),
+      { type: 'response_marked', qid: 'Q1', response: answer('first') }, { type: 'batch_sent' },
+      { type: 'question_resolved', qid: 'Q1', decision: 'First it is', assumed: false }]);
+    mount(s);
+    await userEvent.click(await within(await findCard('Q1')).findByRole('button', { name: 'Reopen' }));
+    expect(label('Q1')).toBe('Settled');
+    await userEvent.click(within(cardOf('Q1')).getByRole('button', { name: 'Close, no changes' }));
+    await waitFor(() => expect(within(cardOf('Q1')).getByRole('button', { name: 'Reopen' })).toBeTruthy());
+    expect(document.activeElement).toBe(cardOf('Q1'));
+    await userEvent.click(within(cardOf('Q1')).getByRole('button', { name: 'Reopen' }));
+    await userEvent.click(within(cardOf('Q1')).getByRole('button', { name: /^Done/ }));      // nothing edited
+    await waitFor(() => expect(within(cardOf('Q1')).getByRole('button', { name: 'Reopen' })).toBeTruthy());
+    expect(label('Q1')).toBe('Settled');
+    expect(s.send.mock.calls.filter(([a]) => a.kind === 'mark')).toHaveLength(0);
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: /Respond to agent/ }).disabled).toBe(true);
+    // Esc folds it back as well, from the card itself.
+    await userEvent.click(within(cardOf('Q1')).getByRole('button', { name: 'Reopen' }));
+    await waitFor(() => expect(cardOf('Q1').contains(document.activeElement)).toBe(true));
+    await userEvent.keyboard('{Escape}{Escape}');
+    await waitFor(() => expect(within(cardOf('Q1')).getByRole('button', { name: 'Reopen' })).toBeTruthy());
+    expect(s.send.mock.calls.filter(([a]) => a.kind === 'mark')).toHaveLength(0);
+  });
+
+  it('a closed session lists its questions and answers as a read-only record', async () => {
+    const s = fakeServer([created(), posted(qi('Q1', 'One'), qi('Q2', 'Two')),
+      { type: 'response_marked', qid: 'Q1', response: answer('my answer') },
+      { type: 'response_marked', qid: 'Q2', response: { kind: 'skip' } }, { type: 'batch_sent' },
+      { type: 'question_resolved', qid: 'Q1', decision: 'Decided one', assumed: false },
+      { type: 'question_resolved', qid: 'Q2', decision: 'Decided two', assumed: true, reason: 'Because' },
+      { type: 'summary_posted', html: '<p>x</p>', markdown: 'x', abstract: 'All settled.' },
+      { type: 'session_confirmed' }]);
+    mount(s);
+    await userEvent.click(await screen.findByRole('button', { name: 'View questions and answers' }));
+    expect(screen.queryByRole('region', { name: 'Summary' })).toBeNull();
+    expect(screen.getByText(/Questions and answers are read-only/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Respond to agent/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Reopen' })).toBeNull();
+    await userEvent.click(within(cardOf('Q1')).getByRole('button', { name: /One/ }));
+    expect(within(cardOf('Q1')).getByText('my answer')).toBeTruthy();
+    expect(within(cardOf('Q1')).getByText('Decided one')).toBeTruthy();
+    expect(screen.queryByRole('textbox')).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: 'Collapse all' }));
+    await waitFor(() => expect(within(cardOf('Q1')).queryByText('Your answer')).toBeNull());
+    await userEvent.click(screen.getByRole('button', { name: 'Expand all' }));
+    expect(within(cardOf('Q1')).getByText('Your answer')).toBeTruthy();
+    expect(within(cardOf('Q2')).getByText('You skipped. The agent decided.')).toBeTruthy();
+    expect(s.send).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole('button', { name: 'Back to summary' }));
+    expect(await screen.findByRole('region', { name: 'Summary' })).toBeTruthy();
+  });
+
   it('loads the new session when pk/id change without a remount', async () => {
     const a = fakeServer([created('Session A'), posted(qi('Q1', 'One'))]);
     const b = fakeServer([created('Session B'), posted(qi('Q1', 'Uno'))]);

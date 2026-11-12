@@ -56,7 +56,7 @@ export function shortcutList(): { keys: string; does: string }[] {
     { keys: 'a', does: 'Accept the recommendation' },
     { keys: 's / i / l', does: 'Skip, Invalid, Later' },
     { keys: 'e or Enter', does: 'Unfold the focused question' },
-    { keys: 'Esc', does: 'Leave the text field, keep the card focused' },
+    { keys: 'Esc', does: 'Leave the text field; again to fold an answered question unchanged' },
     { keys: '?', does: 'Show or hide this list' },
   ];
 }

@@ -86,7 +86,7 @@ export function SessionView({ pk, id, dir, api = defaultApi, storage: storagePro
   const listRef = useRef<HTMLDivElement>(null);
   const respondRef = useRef<HTMLButtonElement>(null);
   /** After a fold: the card to unfold and focus, or null for Respond (or the folded card when Respond is off). */
-  const focusAfter = useRef<{ next: string | null; from: string; waits: number; scroll?: boolean } | null>(null);
+  const focusAfter = useRef<{ next: string | null; from: string; waits: number; scroll?: boolean; card?: boolean } | null>(null);
   const anchor = useRef<{ el: Element; top: number } | null>(null);
   /** The card that last held focus. Task 10 drives this too. */
   const [focused, setFocused] = useState<string | null>(null);
@@ -113,6 +113,8 @@ export function SessionView({ pk, id, dir, api = defaultApi, storage: storagePro
   const [expanded, setExpanded] = useState<string | null | undefined>(undefined);
   /** The user pressed Change on an assumed question in the summary: the list is shown until Back to summary. */
   const [listFromSummary, setListFromSummary] = useState(false);
+  /** A closed session is a record: any number of its cards can be unfolded at once. */
+  const [records, setRecords] = useState<string[]>([]);
   const phase = data.state?.phase;
   useEffect(() => { if (phase === 'active' && listFromSummary) setListFromSummary(false); }, [phase, listFromSummary]);
 
@@ -133,6 +135,8 @@ export function SessionView({ pk, id, dir, api = defaultApi, storage: storagePro
     const target = focusAfter.current;
     if (target === null) return;
     const root = (qid: string) => cardEl(listRef.current, qid);
+    // A card that was folded back keeps the keyboard: focus the card itself, not a field of its closing form.
+    if (target.card) { focusAfter.current = null; root(target.from)?.focus(); return; }
     // An effect left over from an earlier render can run before the render that unfolds the card.
     // Wait for the card to show its form, but only for a couple of runs so a stale request cannot linger.
     if (target.next !== null && !root(target.next)?.classList.contains('is-expanded') && target.waits++ < 2) return;
@@ -194,7 +198,14 @@ export function SessionView({ pk, id, dir, api = defaultApi, storage: storagePro
     },
     // Edit and Reopen remove the button that was clicked, so move focus into the unfolded card; otherwise
     // focus falls to the page and the card's shortcuts stop working.
-    onEdit: (qid: string) => { setExpanded(qid); focusAfter.current = { next: qid, from: qid, waits: 0 }; },
+    onEdit: (qid: string) => {
+      if (readOnly) { setRecords((r) => (r.includes(qid) ? r : [...r, qid])); focusAfter.current = { next: null, from: qid, waits: 0, card: true }; return; }
+      setExpanded(qid); focusAfter.current = { next: qid, from: qid, waits: 0 };
+    },
+    onClose: (qid: string) => {
+      if (readOnly) setRecords((r) => r.filter((x) => x !== qid)); else setExpanded(null);
+      focusAfter.current = { next: null, from: qid, waits: 0, card: true };
+    },
     onDraft: (qid: string, draft: Draft) => outbox.enqueue({ kind: 'draft', qid, draft }),
     onDismiss: (cid: string) => outbox.dismissRejected(cid),
   };
@@ -225,7 +236,8 @@ export function SessionView({ pk, id, dir, api = defaultApi, storage: storagePro
         cardEl(listRef.current, cur)?.focus();
         return true;
       }
-      return false;
+      // Esc on an unfolded answered card folds it back, unless that would throw away edits.
+      return cur !== null && press(cur, '[data-rt-action="close"]:not([data-rt-dirty])');
     }
     if (a.kind === 'respond') {
       const btn = respondRef.current;
@@ -253,7 +265,8 @@ export function SessionView({ pk, id, dir, api = defaultApi, storage: storagePro
         return true;
       }
       case 'unfold': {
-        if (readOnly || state.questions[cur]?.status === 'retracted') return false;
+        if (readOnly) { if (records.includes(cur)) handlers.onClose(cur); else handlers.onEdit(cur); return true; }
+        if (state.questions[cur]?.status === 'retracted') return false;
         if (shownExpanded === cur) {
           const card = cardEl(listRef.current, cur);
           (card?.querySelector<HTMLElement>('input, textarea') ?? card)?.focus();
@@ -271,7 +284,7 @@ export function SessionView({ pk, id, dir, api = defaultApi, storage: storagePro
     if (!q) return null;
     return (
       <div class="rt-node" key={qid}>
-        <QuestionCard question={q} draft={asDraft(drafts[qid])} expanded={shownExpanded === qid} later={isLater(qid)}
+        <QuestionCard question={q} draft={asDraft(drafts[qid])} expanded={readOnly ? records.includes(qid) : shownExpanded === qid} later={isLater(qid)}
           readOnly={readOnly} hidden={!visible(q)} focused={focused === qid} rejected={rejected.filter((r) => 'qid' in r.action && r.action.qid === qid)}
           {...handlers} />
         <div class="rt-children">{q.childIds.map(renderNode)}</div>
@@ -337,6 +350,7 @@ export function SessionView({ pk, id, dir, api = defaultApi, storage: storagePro
           <Summary state={state} outbox={outbox} offline={offline}
             confirmPending={outbox.pending().some((a) => a.kind === 'confirm')}
             rejected={rejected.filter((r) => r.action.kind === 'confirm' || r.action.kind === 'reopen')}
+            onViewList={() => setListFromSummary(true)}
             onChange={(qid) => {
               setListFromSummary(true);
               setExpanded(qid);
@@ -344,7 +358,16 @@ export function SessionView({ pk, id, dir, api = defaultApi, storage: storagePro
             }} />
         )}
         {listFromSummary && (
-          <button type="button" class="rt-btn rt-btn-small rt-back-summary" onClick={() => setListFromSummary(false)}>Back to summary</button>
+          <div class="rt-list-bar">
+            <button type="button" class="rt-btn rt-btn-small rt-back-summary" onClick={() => setListFromSummary(false)}>Back to summary</button>
+            {readOnly && (
+              <button type="button" class="rt-btn rt-btn-small"
+                onClick={() => setRecords(records.length > 0 ? [] : state.order.filter((x) => state.questions[x]))}>
+                {records.length > 0 ? 'Collapse all' : 'Expand all'}
+              </button>
+            )}
+            {readOnly && <span class="rt-list-note">This session is closed. Questions and answers are read-only.</span>}
+          </div>
         )}
         <div class="rt-questions" ref={listRef} hidden={inSummary}
           onFocusIn={(e) => {

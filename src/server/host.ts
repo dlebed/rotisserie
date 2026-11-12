@@ -21,7 +21,7 @@ export type HostSeams = {
   listen?: (s: http.Server, port: number, host: string) => Promise<void>;
 };
 
-function probeHealth(host: string, port: number): Promise<ProbeResult> {
+export function probeHealth(host: string, port: number): Promise<ProbeResult> {
   return new Promise((resolve) => {
     const req = http.get({ host, port, path: '/api/health', timeout: PROBE_TIMEOUT_MS }, (res) => {
       let body = '';
