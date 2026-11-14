@@ -41,7 +41,9 @@ export function AnswerForm({ q, draft, saved, onChange }: {
             return (
               <label key={o.id} class={`rt-option${checked ? ' is-checked' : ''}`}>
                 <input type={q.multi ? 'checkbox' : 'radio'} name={`${id}-opt`} checked={checked}
-                  onChange={(e) => toggle(o.id, e.currentTarget.checked)} />
+                  onChange={(e) => toggle(o.id, e.currentTarget.checked)}
+                  // A checked radio gets no change event, so a second click (or its number key) deselects it here.
+                  onClick={() => { if (!q.multi && checked) toggle(o.id, false); }} />
                 <span class="rt-option-text">
                   <span class="rt-option-head">
                     <span class="rt-option-label">{o.label}</span>

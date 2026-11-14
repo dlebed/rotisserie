@@ -7,7 +7,7 @@ const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const host = startHostLoop();
 const tools = createTools(projectDir, { ready: () => host.ready() });
 
-const server = new McpServer({ name: 'rotisserie', version: '0.1.1' });
+const server = new McpServer({ name: 'rotisserie', version: '0.1.2' });
 for (const [name, t] of Object.entries(tools)) {
   server.registerTool(name, { description: t.description, inputSchema: t.schema }, async (args: unknown) => {
     try {

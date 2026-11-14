@@ -82,7 +82,7 @@ Keys without Ctrl/Cmd or Alt are ignored while you are typing in a text field.
 | Alt+Down / Alt+Up | Next / previous question (works while typing) |
 | J / K | Next / previous question |
 | N | Next new question |
-| 1 to 9 | Pick or toggle that option |
+| 1 to 9 | Pick that option; again to deselect it |
 | A | Accept the recommendation |
 | S, I, L | Skip, Invalid, Later |
 | E or Enter | Unfold the focused question |

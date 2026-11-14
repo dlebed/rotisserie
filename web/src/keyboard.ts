@@ -52,7 +52,7 @@ export function shortcutList(): { keys: string; does: string }[] {
     { keys: 'Alt+↓ / Alt+↑', does: 'Next / previous question, also while typing' },
     { keys: 'j / k', does: 'Next / previous question' },
     { keys: 'n', does: 'Next new question' },
-    { keys: '1–9', does: 'Pick or toggle that option' },
+    { keys: '1–9', does: 'Pick that option; again to deselect it' },
     { keys: 'a', does: 'Accept the recommendation' },
     { keys: 's / i / l', does: 'Skip, Invalid, Later' },
     { keys: 'e or Enter', does: 'Unfold the focused question' },

@@ -581,7 +581,7 @@ function shortcutList() {
     { keys: "Alt+\u2193 / Alt+\u2191", does: "Next / previous question, also while typing" },
     { keys: "j / k", does: "Next / previous question" },
     { keys: "n", does: "Next new question" },
-    { keys: "1\u20139", does: "Pick or toggle that option" },
+    { keys: "1\u20139", does: "Pick that option; again to deselect it" },
     { keys: "a", does: "Accept the recommendation" },
     { keys: "s / i / l", does: "Skip, Invalid, Later" },
     { keys: "e or Enter", does: "Unfold the focused question" },
@@ -735,7 +735,10 @@ function AnswerForm({ q: q2, draft, saved, onChange }) {
               type: q2.multi ? "checkbox" : "radio",
               name: `${id}-opt`,
               checked,
-              onChange: (e3) => toggle(o4.id, e3.currentTarget.checked)
+              onChange: (e3) => toggle(o4.id, e3.currentTarget.checked),
+              onClick: () => {
+                if (!q2.multi && checked) toggle(o4.id, false);
+              }
             }
           ),
           /* @__PURE__ */ a3("span", { class: "rt-option-text", children: [

@@ -37980,7 +37980,7 @@ function markIndexes(events) {
 var projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 var host = startHostLoop();
 var tools = createTools(projectDir, { ready: () => host.ready() });
-var server = new McpServer({ name: "rotisserie", version: "0.1.1" });
+var server = new McpServer({ name: "rotisserie", version: "0.1.2" });
 for (const [name, t] of Object.entries(tools)) {
   server.registerTool(name, { description: t.description, inputSchema: t.schema }, async (args) => {
     try {

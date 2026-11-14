@@ -135,13 +135,15 @@ describe('keyboard shortcuts', () => {
     await waitFor(() => expect(within(cardOf('Q1')).getByRole<HTMLInputElement>('radio', { name: /Beta/ }).checked).toBe(true));
   });
 
-  it('a number picks that option and toggles checkboxes', async () => {
+  it('a number picks that option, and again deselects it; it toggles checkboxes', async () => {
     const opts = [{ id: 'a', label: 'Alpha' }, { id: 'b', label: 'Beta' }];
     const s = fakeServer([created(), posted(qi('Q1', 'One', { options: opts }), qi('Q2', 'Two', { options: opts, multi: true }))]);
     mount(s);
     (await findCard('Q1')).focus();
     await userEvent.keyboard('2');
     await waitFor(() => expect(within(cardOf('Q1')).getByRole<HTMLInputElement>('radio', { name: /Beta/ }).checked).toBe(true));
+    await userEvent.keyboard('2');
+    await waitFor(() => expect(within(cardOf('Q1')).getByRole<HTMLInputElement>('radio', { name: /Beta/ }).checked).toBe(false));
     await userEvent.click(within(cardOf('Q2')).getByRole('button', { name: /Two/ }));
     cardOf('Q2').focus();
     await userEvent.keyboard('1');

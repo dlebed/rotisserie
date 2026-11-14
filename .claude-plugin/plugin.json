@@ -1,6 +1,6 @@
 {
   "name": "rotisserie",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Move grill-me interview rounds into a live browser page while the agent waits at zero token cost.",
   "author": {
     "name": "Dmitrii Lebed",

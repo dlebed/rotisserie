@@ -163,7 +163,7 @@ The rest of the map is **my call** and open to change:
 | Alt+Down / Alt+Up | Next / previous question (works while typing) |
 | J / K | Next / previous question |
 | N | Jump to the next new question |
-| 1 to 9 | Pick or toggle that option |
+| 1 to 9 | Pick that option; again to deselect it |
 | A | Accept the agent's recommendation |
 | S, I, L | Skip, Invalid, Later |
 | E or Enter | Unfold the focused question to edit it |

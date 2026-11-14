@@ -85,6 +85,42 @@ describe('QuestionCard', () => {
     expect(screen.getByText('Pick any')).toBeTruthy();
   });
 
+  it('clicking the chosen radio again deselects it, so the answer can be free text only', async () => {
+    const { onDone } = card(question({ options }), { expanded: true });
+    const radio = screen.getByRole<HTMLInputElement>('radio', { name: /Fall back/ });
+    await userEvent.click(radio);
+    expect(radio.checked).toBe(true);
+    await userEvent.click(radio);
+    expect(radio.checked).toBe(false);
+    expect(screen.getAllByRole<HTMLInputElement>('radio').some((r) => r.checked)).toBe(false);
+    await userEvent.type(screen.getByRole('textbox', { name: 'Write my own answer' }), 'my own');
+    await userEvent.click(screen.getByRole('button', { name: /^Done/ }));
+    expect(onDone).toHaveBeenCalledWith('Q1', { kind: 'answer', optionIds: [], text: 'my own' });
+  });
+
+  it('clicking another radio switches the choice, and an accepted recommendation can be deselected', async () => {
+    card(question({ options, recommendation: 'Stop and show the command.' }), { expanded: true });
+    const a = screen.getByRole<HTMLInputElement>('radio', { name: /Stop and show/ });
+    const b = screen.getByRole<HTMLInputElement>('radio', { name: /Fall back/ });
+    await userEvent.click(screen.getByRole('button', { name: /^Accept/ }));
+    expect(a.checked).toBe(true);
+    await userEvent.click(b);
+    expect([a.checked, b.checked]).toEqual([false, true]);
+    await userEvent.click(a);
+    expect([a.checked, b.checked]).toEqual([true, false]);
+    await userEvent.click(a);
+    expect([a.checked, b.checked]).toEqual([false, false]);
+  });
+
+  it('a checkbox still toggles once per click', async () => {
+    card(question({ options, multi: true }), { expanded: true });
+    const box = screen.getByRole<HTMLInputElement>('checkbox', { name: /Fall back/ });
+    await userEvent.click(box);
+    expect(box.checked).toBe(true);
+    await userEvent.click(box);
+    expect(box.checked).toBe(false);
+  });
+
   it('Accept selects the recommended option', async () => {
     const { onDone } = card(question({ options, recommendation: 'Stop and show the command.' }), { expanded: true });
     const rec = screen.getByRole<HTMLInputElement>('radio', { name: /Stop and show/ });
